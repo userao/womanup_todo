@@ -10,6 +10,9 @@ import routes from '../routes.js';
 import isExpired from '../isExpired.js';
 import uploadFile from '../uploadFile.js';
 
+/**
+ * React component that renders modal window for adding new task
+ */
 const AddTodoModal = ({isShown, handleClose}) => {
   const dispatch = useDispatch();
   const formRef = useRef();

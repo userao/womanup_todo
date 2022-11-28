@@ -4,6 +4,11 @@ import _ from 'lodash';
 
 dayjs.extend(minMax);
 
+/**
+ * Function checks if todo expired
+ * @param {string} date 
+ * @returns 
+ */
 const isExpired = (date) => {
   const expDate = dayjs(date);
   const today = dayjs().hour(0).minute(0).second(0).millisecond(0);

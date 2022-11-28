@@ -10,16 +10,23 @@ import routes from '../routes.js';
 import Todo from './Todo.jsx';
 import isExpired from '../isExpired.js';
 
+/**
+ * Function normalizing fetched todos
+ * @param {object} data data fetched from backend 
+ */
 const getNormalizedTodos = (data) => {
   if (!data) return [];
   return Object.entries(data)
     .map(([id, value]) => {
       const expired = isExpired(data.expDate);
-      // const active = value.active === 'true' ? true : false;
       return ({ ...value, expired, id });
     })
   };
 
+
+/**
+ * React component that renders all todos fetched from backend 
+ */
 const Todos = () => {
   const dispatch = useDispatch();
   useEffect(() => {

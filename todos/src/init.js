@@ -6,6 +6,9 @@ import App from './components/App.js';
 import todosReducer from './slices/todosSlice.js';
 import todoModalReducer from './slices/todoModalSlice.js';
 
+/**
+ * Functions initializing toolkit store and mounting app on dom element
+ */
 const runApp = () => {
   const store = configureStore({
     reducer: {

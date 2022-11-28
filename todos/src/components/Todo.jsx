@@ -8,9 +8,13 @@ import routes from '../routes.js';
 import { actions as todosActions } from '../slices/todosSlice';
 import { actions as todoModalActions } from '../slices/todoModalSlice.js';
 
+/**
+ * React component that renders task passed to it 
+ * @param {object} todo Todo object
+ */
 const Todo = ({ todo }) => {
   const dispatch = useDispatch();
-  const { name, description, id, expDate, expired, file, active } = todo;
+  const { name, id, expired, active } = todo;
   const itemVariant = expired ? 'danger' : null;
   const buttonVariant = active ? 'danger' : 'success'; 
   const buttonText = active ? 'Завершить' : 'Активировать';

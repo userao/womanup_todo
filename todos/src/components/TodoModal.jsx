@@ -15,6 +15,9 @@ import { getDownloadURL, ref } from 'firebase/storage';
 import FileSaver from 'file-saver';
 import uploadFile from '../uploadFile.js';
 
+/**
+ * React component that renders modal window, where detailed information about each todo displayed  
+ */
 const TodoModal = ({ todoId }) => {
   const dispatch = useDispatch();
   const todos = useSelector(todosSelectors.selectAll);
