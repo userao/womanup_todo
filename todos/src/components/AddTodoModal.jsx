@@ -4,20 +4,26 @@ import { useDispatch } from 'react-redux';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button'; 
-import {  useFormik } from 'formik';
+import { useFormik } from 'formik';
 import { actions as todosActions } from '../slices/todosSlice.js';
 import routes from '../routes.js';
 import isExpired from '../isExpired.js';
+import uploadFile from '../uploadFile.js';
 
 const AddTodoModal = ({isShown, handleClose}) => {
   const dispatch = useDispatch();
   const formRef = useRef();
   const [connectionFailed, setConnectionFailed] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   const handleSubmit = (values, actions) => {
     actions.setSubmitting(true);
     const expired = isExpired(values.expDate);
-    const newTodo = { ...values, active: true, expired };
+    const newTodo = { ...values, active: true, expired, fileName: selectedFile ? selectedFile.name : null };
+    if (selectedFile) {
+      uploadFile(selectedFile);
+      setSelectedFile(null);
+    }
     axios.post(routes.todosPath(), newTodo)
       .then(({ data }) => {
         dispatch(todosActions.addTodo({ ...newTodo, id: data.name }));
@@ -32,12 +38,15 @@ const AddTodoModal = ({isShown, handleClose}) => {
       });
   }
 
+  const fileInput = (e) => {
+    setSelectedFile(e.target.files[0]);
+  };
+
   const f = useFormik({
      initialValues: {
         name: '',
         description: '',
-        file: null,
-        expDate: null,
+        expDate: '',
       },
       onSubmit: (values, actions) => handleSubmit(values, actions),
    });
@@ -73,11 +82,11 @@ const AddTodoModal = ({isShown, handleClose}) => {
           </Form.Group>
           <Form.Group className="mb-3" controlId="file">
             <Form.Label>Прикрепленные файлы</Form.Label>
-            <Form.Control onChange={f.handleChange} name="file" type="file" />
+            <Form.Control onChange={fileInput} name="file" type="file" />
           </Form.Group>
           <Form.Group className="mb-3" controlId="expDate">
             <Form.Label>Дата завершения</Form.Label>
-            <Form.Control  required name="expDate" onChange={f.handleChange} type="date"  />
+            <Form.Control required name="expDate" onChange={f.handleChange} type="date" />
           </Form.Group>
           {connectionFailed && <div className="alert alert-danger" role="alert">Ошибка связи</div>}
           <div className="d-flex flex-row-reverse">

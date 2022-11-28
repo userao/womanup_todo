@@ -10,11 +10,16 @@ import { actions as todosModalActions } from '../slices/todoModalSlice.js';
 import routes from '../routes.js';
 import isExpired from '../isExpired.js';
 import { selectors as todosSelectors } from '../slices/todosSlice.js';
+import storage from '../firebase.js';
+import { getDownloadURL, ref } from 'firebase/storage';
+import FileSaver from 'file-saver';
+import uploadFile from '../uploadFile.js';
 
 const TodoModal = ({ todoId }) => {
   const dispatch = useDispatch();
   const todos = useSelector(todosSelectors.selectAll);
   const [isReadOnly, setIsReadOnly] = useState(true);
+  const [selectedFile, setSelectedFile] = useState(null); 
  
   const todo = todos.find((todo) => todo.id === todoId);
   const f = useFormik({
@@ -22,7 +27,7 @@ const TodoModal = ({ todoId }) => {
       name: todo.name,
       description: todo.description,
       expDate: todo.expDate,
-      file: todo.file,
+      fileName: todo.fileName,
     },
     onSubmit: (values, actions) => console.log(values),
   });
@@ -42,10 +47,13 @@ const TodoModal = ({ todoId }) => {
       name: f.values.name,
       description: f.values.description,
       expDate: f.values.expDate,
-      file: f.values.file ?? null,
       expired: isExpired(f.values.expDate),
+      fileName: selectedFile ? selectedFile.name : null,
     };
-    console.log(updates.file);
+    if (selectedFile) {
+      uploadFile(selectedFile);
+      setSelectedFile(null);
+    }
     const editedTodo = { ...todo, ...updates };
     dispatch(todosActions.updateTodo(editedTodo));
     axios.patch(routes.todoPath(todo.id), updates);
@@ -58,6 +66,20 @@ const TodoModal = ({ todoId }) => {
     f.values.expDate = todo.expDate;
     setIsReadOnly(true);
   };
+
+  const downloadFile = () => {
+    getDownloadURL(ref(storage, f.values.fileName))
+      .then((url) => {
+        const xhr = new XMLHttpRequest();
+        xhr.responseType = 'blob';
+        xhr.onload = () => {
+          const blob = xhr.response;
+          FileSaver.saveAs(blob, f.values.fileName);
+        };
+        xhr.open('GET', url);
+        xhr.send();
+      });
+  }
 
   const makeActive = () => setIsReadOnly(false);
 
@@ -94,15 +116,18 @@ const TodoModal = ({ todoId }) => {
               value={f.values.description}
             />
           </Form.Group>
-          <Form.Group className="mb-3" controlId="file">
-            <Form.Label className="fw-bold">Прикрепленные файлы</Form.Label>
-            <Form.Control
-              onChange={f.handleChange}
-              disabled={isReadOnly}
-              name="file"
-              type="file"
-            />
-          </Form.Group>
+          {isReadOnly
+          ? todo.fileName ? <Button className="my-2" onClick={downloadFile}>Скачать файл</Button> : null
+          : <Form.Group className="mb-3" controlId="fileName">
+              <Form.Label className="fw-bold">Прикрепленные файлы</Form.Label>
+              <Form.Control
+                onChange={(e) => setSelectedFile(e.target.files[0])}
+                disabled={isReadOnly}
+                name="fileName"
+                type="file"
+              />
+            </Form.Group>
+          }
           <Form.Group className="mb-3" controlId="expDate">
             <Form.Label className="fw-bold">Дата завершения</Form.Label>
             <Form.Control

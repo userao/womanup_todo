@@ -17,7 +17,7 @@ const Todo = ({ todo }) => {
 
   const switchActiveState = (id, currentState) => {
     dispatch(todosActions.switchActiveState({ id, currentState }));    
-    axios.patch(routes.todosPath(), {[`${id}/active`]:`${!currentState}`});
+    axios.patch(routes.todosPath(), {[`${id}/active`]:!currentState});
   }; 
 
   const showTodoModal = (id) => {

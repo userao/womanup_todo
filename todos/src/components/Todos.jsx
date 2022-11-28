@@ -15,8 +15,8 @@ const getNormalizedTodos = (data) => {
   return Object.entries(data)
     .map(([id, value]) => {
       const expired = isExpired(data.expDate);
-      const active = value.active === 'true' ? true : false;
-      return ({ ...value, active, expired, id });
+      // const active = value.active === 'true' ? true : false;
+      return ({ ...value, expired, id });
     })
   };
 
